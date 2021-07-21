@@ -42,3 +42,11 @@ resource "aws_security_group" "example" {
     Name = "allow_tls"
   }
 }
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.private.id
+
+  tags = {
+    Name = "vpc-private-igw"
+  }
+}

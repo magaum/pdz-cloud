@@ -125,7 +125,7 @@ resource "aws_apigatewayv2_stage" "example" {
 resource "aws_apigatewayv2_vpc_link" "example" {
   name               = "example"
   security_group_ids = [aws_security_group.example.id]
-  subnet_ids         = aws_subnet.private.id
+  subnet_ids         = [aws_subnet.private.id]
 
   tags = {
     Usage = "example"
