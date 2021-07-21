@@ -1,0 +1,11 @@
+{
+  "name": "contagem",
+  "version": "1.0.0",
+  "description": "Lambda para atualizar contagem no banco de dados",
+  "main": "index.js",
+  "scripts": {
+    "test": "test --collectCoverage"
+  },
+  "author": "weslei.paula@fatec.sp.gov.br",
+  "license": "ISC"
+}
