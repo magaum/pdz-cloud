@@ -31,3 +31,16 @@ resource "aws_lb_target_group" "lb_target_group" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.private.id
 }
+
+resource aws_lambda_permission lb_lambda_invoke_permission {
+  statement_id = "AllowExecutionFromALB"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.contagem.function_name
+  principal = "elasticloadbalancing.amazonaws.com"
+  source_arn = aws_lb_target_group.lb_target_group.arn
+}
+resource aws_lb_target_group_attachment main {
+  target_group_arn = aws_lb_target_group.lb_target_group.arn
+  target_id = aws_lambda_function.contagem.arn
+  depends_on = [ aws_lambda_permission.lb_lambda_invoke_permission ]
+}
