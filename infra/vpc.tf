@@ -26,6 +26,15 @@ resource "aws_subnet" "subnet_b" {
   }
 }
 
+# resource "aws_route_table" "private" {
+#   vpc_id = "${aws_vpc.private.id}"
+
+#   tags {
+#     Name        = "private-route-table"
+#     Environment = var.Environment
+#   }
+# }
+
 resource "aws_security_group" "contagem" {
   name        = "allow_tls"
   description = "Allow TLS inbound traffic"

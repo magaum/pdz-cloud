@@ -7,7 +7,6 @@
 #   }
 # }
 
-
 resource "aws_ecs_cluster" "contador_cluster" {
   name = "pdz"
 
@@ -34,31 +33,34 @@ resource "aws_cloudwatch_log_group" "contador_logs" {
 }
 
 resource "aws_ecs_service" "contador" {
-  name            = "contador-api"
-  cluster         = aws_ecs_cluster.contador_cluster.id
-  task_definition = aws_ecs_task_definition.contador.arn
-  desired_count   = 1
-#   launch_type     = "FARGATE"
-
+  name                     = "contador-api"
+  cluster                  = aws_ecs_cluster.contador_cluster.id
+  task_definition          = aws_ecs_task_definition.contador.arn
+  desired_count            = 1
+  # launch_type              = "FARGATE"
+  # network_mode             = "awsvpc"
   ordered_placement_strategy {
     type  = "binpack"
     field = "cpu"
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
+    target_group_arn = aws_lb_target_group.ecs_target_group.arn
     container_name   = "contador"
-    container_port   = 443
+    container_port   = 80
   }
 
-  network_configuration {
-    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-    security_groups = [aws_security_group.contagem.id]
-  }
+  # network_configuration {
+  #   subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  #   security_groups = [aws_security_group.contagem.id]
+  # }
+  depends_on = [aws_lb_target_group.ecs_target_group]
 }
 
 resource "aws_ecs_task_definition" "contador" {
   family = "service"
+  # requires_compatibilities = ["FARGATE"]
+  # network_mode = "awsvpc"
   container_definitions = jsonencode([
     {
       name      = "contador"
@@ -68,8 +70,8 @@ resource "aws_ecs_task_definition" "contador" {
       essential = true
       portMappings = [
         {
-          containerPort = 443
-          hostPort      = 443
+          containerPort = 80
+          hostPort      = 80
         }
       ]
     }

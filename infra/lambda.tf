@@ -48,7 +48,7 @@ resource "aws_lambda_function" "contagem" {
   function_name = var.lambda_name
   source_code_hash = data.archive_file.contagem.output_base64sha256
   role          = aws_iam_role.lambda_permission.arn
-  handler       = "index.js"
+  handler       = "index.handler"
 
   runtime = "nodejs12.x"
 
