@@ -1,22 +1,21 @@
-resource "aws_lb" "example" {
+resource "aws_lb" "contagem" {
   name               = "application-load-balancer"
   internal           = true
   load_balancer_type = "application"
-  subnets            = aws_subnet.private.*.id
-
+  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   tags = {
-    Environment = "dev"
+    Environment = var.Environment
   }
 }
 
-resource "aws_lb_listener" "example" {
-  load_balancer_arn = aws_lb.example.arn
+resource "aws_lb_listener" "contagem" {
+  load_balancer_arn = aws_lb.contagem.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type = "redirect"
-
+    target_group_arn = aws_lb_target_group.lb_target_group.arn
     redirect {
       port        = "443"
       protocol    = "HTTPS"
@@ -26,9 +25,9 @@ resource "aws_lb_listener" "example" {
 }
 
 resource "aws_lb_target_group" "lb_target_group" {
-  name     = "tf-example-lb-tg"
-  port     = 80
-  protocol = "HTTP"
+  name     = "contagem-lb-tg"
+  port     = 443
+  protocol = "HTTPS"
   vpc_id   = aws_vpc.private.id
 }
 

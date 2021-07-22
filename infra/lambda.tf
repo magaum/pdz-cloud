@@ -18,33 +18,59 @@ resource "aws_iam_role" "lambda_permission" {
 EOF
 }
 
+data "archive_file" "contagem" {
+  type = "zip"
+
+  source_dir  = "${path.module}./lambda"
+  output_path = "${path.module}/lambda.zip"
+}
+
+resource "aws_s3_bucket" "lambda_bucket" {
+  bucket = "pdz-lambda-contagem"
+
+  acl           = "private"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_object" "contagem" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+
+  key    = "contagem.zip"
+  source = data.archive_file.contagem.output_path
+
+  etag = filemd5(data.archive_file.contagem.output_path)
+}
+
+
 resource "aws_lambda_function" "contagem" {
-  filename      = "contagem.zip"
+  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_key    = aws_s3_bucket_object.contagem.key
   function_name = var.lambda_name
+  source_code_hash = data.archive_file.contagem.output_base64sha256
   role          = aws_iam_role.lambda_permission.arn
   handler       = "index.js"
 
   runtime = "nodejs12.x"
 
   vpc_config {
-    subnet_ids         = [aws_subnet.private.id]
-    security_group_ids = [aws_security_group.example.id]
+    subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+    security_group_ids = [aws_security_group.contagem.id]
   }
 
   environment {
     variables = {
       Name = "contagem",
-      Environment = "dev"
+      Environment = var.Environment
     }
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_logs,
-    aws_cloudwatch_log_group.example,
+    aws_cloudwatch_log_group.contagem,
   ]
 }
 
-resource "aws_cloudwatch_log_group" "example" {
+resource "aws_cloudwatch_log_group" "contagem" {
   name              = "/aws/lambda/${var.lambda_name}"
   retention_in_days = 3
 }
@@ -60,16 +86,22 @@ resource "aws_iam_policy" "lambda_logging" {
   "Statement": [
     {
       "Action": [
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeInstances",
+        "ec2:AttachNetworkInterface",
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:*",
+      "Resource": "*",
       "Effect": "Allow"
     }
   ]
 }
 EOF
+# "Resource": "arn:aws:logs:*:*:*",
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {

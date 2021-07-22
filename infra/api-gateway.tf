@@ -1,83 +1,91 @@
-resource "aws_apigatewayv2_api" "example" {
-  name          = "example-http-api"
+resource "aws_apigatewayv2_api" "contagem" {
+  name          = "contagem-http-api"
   protocol_type = "HTTP"
+
+  # depends_on = [
+  #   aws_apigatewayv2_domain_name.contagem
+  # ]
 }
 
-resource "aws_apigatewayv2_api_mapping" "example" {
-  api_id      = aws_apigatewayv2_api.example.id
-  domain_name = aws_apigatewayv2_domain_name.example.id
-  stage       = aws_apigatewayv2_stage.example.id
-}
+# resource "aws_apigatewayv2_api_mapping" "contagem" {
+#   api_id      = aws_apigatewayv2_api.contagem.id
+#   domain_name = aws_apigatewayv2_domain_name.contagem.id
+#   stage       = aws_apigatewayv2_stage.contagem.id
+# }
 
-resource "aws_apigatewayv2_domain_name" "example" {
-  domain_name = "http-api.example.com"
+# resource "aws_apigatewayv2_domain_name" "contagem" {
+#   domain_name = var.domain_name
 
-  domain_name_configuration {
-    certificate_arn = aws_acm_certificate.example.arn
-    endpoint_type   = "REGIONAL"
-    security_policy = "TLS_1_2"
-  }
-}
+#   domain_name_configuration {
+#     certificate_arn = aws_acm_certificate.contagem.arn
+#     endpoint_type   = "REGIONAL"
+#     security_policy = "TLS_1_2"
+#   }
 
-resource "aws_acm_certificate" "example" {
-  domain_name       = "example.com"
-  validation_method = "DNS"
+#   timeouts {
+#     create = "10m"
+#   }
+# }
 
-  tags = {
-    Environment = "test"
-  }
+# resource "aws_acm_certificate" "contagem" {
+#   domain_name       = var.domain_name
+#   validation_method = "DNS"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#   tags = {
+#     Environment = var.Environment
+#   }
 
-resource "aws_route53_zone" "example" {
-  name = "dev.example.com"
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
 
-  tags = {
-    Environment = "dev"
-  }
-}
+# resource "aws_route53_zone" "contagem" {
+#   name = var.domain_name
+
+#   tags = {
+#     Environment = var.Environment
+#   }
+# }
 
 
-resource "aws_route53_record" "example" {
-  name    = aws_apigatewayv2_domain_name.example.domain_name
-  type    = "A"
-  zone_id = aws_route53_zone.example.zone_id
+# resource "aws_route53_record" "contagem" {
+#   name    = aws_apigatewayv2_domain_name.contagem.domain_name
+#   type    = "A"
+#   zone_id = aws_route53_zone.contagem.zone_id
 
-  alias {
-    name                   = aws_apigatewayv2_domain_name.example.domain_name_configuration[0].target_domain_name
-    zone_id                = aws_apigatewayv2_domain_name.example.domain_name_configuration[0].hosted_zone_id
-    evaluate_target_health = false
-  }
-}
+#   alias {
+#     name                   = aws_apigatewayv2_domain_name.contagem.domain_name_configuration[0].target_domain_name
+#     zone_id                = aws_apigatewayv2_domain_name.contagem.domain_name_configuration[0].hosted_zone_id
+#     evaluate_target_health = false
+#   }
+# }
 
-resource "aws_apigatewayv2_integration" "example" {
-  api_id           = aws_apigatewayv2_api.example.id
-  description      = "Example with a load balancer"
+resource "aws_apigatewayv2_integration" "contagem" {
+  api_id           = aws_apigatewayv2_api.contagem.id
+  description      = "contagem with a load balancer"
   integration_type = "HTTP_PROXY"
-  integration_uri  = aws_lb_listener.example.arn
+  integration_uri  = aws_lb_listener.contagem.arn
 
   integration_method = "ANY"
   connection_type    = "VPC_LINK"
-  connection_id      = aws_apigatewayv2_vpc_link.example.id
+  connection_id      = aws_apigatewayv2_vpc_link.contagem.id
 
-  tls_config {
-    server_name_to_verify = "example.com"
-  }
+  # tls_config {
+  #   server_name_to_verify = var.domain_name
+  # }
 
-  request_parameters = {
-    "append:header.authforintegration" = "$context.authorizer.authorizerResponse"
-    "overwrite:path"                   = "staticValueForIntegration"
-  }
+  # request_parameters = {
+  #   "append:header.authforintegration" = "$context.authorizer.authorizerResponse"
+  #   "overwrite:path"                   = "staticValueForIntegration"
+  # }
 
-  response_parameters {
-    status_code = 403
-    mappings = {
-      "append:header.auth" = "$context.authorizer.authorizerResponse"
-    }
-  }
+  # response_parameters {
+  #   status_code = 403
+  #   mappings = {
+  #     "append:header.auth" = "$context.authorizer.authorizerResponse"
+  #   }
+  # }
 
   response_parameters {
     status_code = 200
@@ -87,47 +95,54 @@ resource "aws_apigatewayv2_integration" "example" {
   }
 }
 
-resource "aws_apigatewayv2_model" "example" {
-  api_id       = aws_apigatewayv2_api.example.id
-  content_type = "application/json"
-  name         = "example"
+# resource "aws_apigatewayv2_model" "contagem" {
+#   api_id       = aws_apigatewayv2_api.contagem.id
+#   content_type = "application/json"
+#   name         = "contagem"
 
-  schema = <<EOF
-{
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "ExampleModel",
-  "type": "object",
-  "properties": {
-    "id": { "type": "string" }
-  }
-}
-EOF
-}
+#   schema = <<EOF
+# {
+#   "$schema": "http://json-schema.org/draft-04/schema#",
+#   "title": "contagemModel",
+#   "type": "object",
+#   "properties": {
+#     "id": { "type": "string" }
+#   }
+# }
+# EOF
+# }
 
-resource "aws_apigatewayv2_route" "example" {
-  api_id    = aws_apigatewayv2_api.example.id
-  route_key = "$default"
+resource "aws_apigatewayv2_route" "contagem" {
+  api_id    = aws_apigatewayv2_api.contagem.id
+  route_key = "GET /count/{username}"
 
-  target = "integrations/${aws_apigatewayv2_integration.example.id}"
-}
-
-resource "aws_apigatewayv2_route_response" "example" {
-  api_id             = aws_apigatewayv2_api.example.id
-  route_id           = aws_apigatewayv2_route.example.id
-  route_response_key = "$default"
+  target = "integrations/${aws_apigatewayv2_integration.contagem.id}"
 }
 
-resource "aws_apigatewayv2_stage" "example" {
-  api_id = aws_apigatewayv2_api.example.id
-  name   = "example-stage"
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name = "/aws/api_gw/${aws_apigatewayv2_api.contagem.name}"
+
+  retention_in_days = 3
 }
 
-resource "aws_apigatewayv2_vpc_link" "example" {
-  name               = "example"
-  security_group_ids = [aws_security_group.example.id]
-  subnet_ids         = [aws_subnet.private.id]
+# resource "aws_apigatewayv2_route_response" "contagem" {
+#   api_id             = aws_apigatewayv2_api.contagem.id
+#   route_id           = aws_apigatewayv2_route.contagem.id
+#   route_response_key = "$default"
+# }
+
+resource "aws_apigatewayv2_stage" "contagem" {
+  auto_deploy = true
+  api_id = aws_apigatewayv2_api.contagem.id
+  name   = "count"
+}
+
+resource "aws_apigatewayv2_vpc_link" "contagem" {
+  name               = "contagem"
+  security_group_ids = [aws_security_group.contagem.id]
+  subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 
   tags = {
-    Usage = "example"
+    Usage = "contagem"
   }
 }

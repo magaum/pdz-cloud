@@ -21,6 +21,6 @@ resource "aws_dynamodb_table" "tabela-contagem" {
   }
   tags = {
     Name        = "tabela-contagem"
-    Environment = "dev"
+    Environment = var.Environment
   }
 }
