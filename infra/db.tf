@@ -9,17 +9,7 @@ resource "aws_dynamodb_table" "tabela-contagem" {
     name = "username"
     type = "S"
   }
-
-#   attribute {
-#     name = "access"
-#     type = "N"
-#   }
-
-  # ttl {
-  #   attribute_name = "TimeToExist"
-  #   enabled        = false
-  # }
-
+  
   tags = {
     Name        = "tabela-contagem"
     Environment = var.Environment

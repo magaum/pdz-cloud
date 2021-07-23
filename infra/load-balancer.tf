@@ -1,8 +1,9 @@
 resource "aws_lb" "contagem" {
   name               = "application-load-balancer"
-  internal           = true
+  internal           = false
   load_balancer_type = "application"
-  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  subnets            = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+  security_groups    = [aws_security_group.public_contagem.id]
   tags = {
     Environment = var.Environment
   }
@@ -12,17 +13,22 @@ resource "aws_lb_listener" "contagem" {
   load_balancer_arn = aws_lb.contagem.arn
   port              = "80"
   protocol          = "HTTP"
+
   default_action {
-    type             = "forward"
+    type = "forward"
     forward {
       target_group {
         arn    = aws_lb_target_group.lambda_target_group.arn
-        weight = 50
+        weight = 99
       }
 
       target_group {
         arn    = aws_lb_target_group.ecs_target_group.arn
-        weight = 50
+        weight = 1
+      }
+      stickiness {
+        enabled  = false
+        duration = 1
       }
     }
   }
@@ -31,7 +37,7 @@ resource "aws_lb_listener" "contagem" {
 resource "aws_lb_target_group" "lambda_target_group" {
   name        = "lambda-contagem-tg"
   target_type = "lambda"
-  vpc_id      = aws_vpc.private.id
+  vpc_id      = aws_vpc.public.id
 
   lifecycle {
     create_before_destroy = true
@@ -42,10 +48,10 @@ resource "aws_lb_target_group" "lambda_target_group" {
 
 resource "aws_lb_target_group" "ecs_target_group" {
   name        = "ecs-contagem-tg"
-  target_type = "instance"
+  target_type = "ip"
   port        = 80
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.private.id
+  vpc_id      = aws_vpc.public.id
 
   lifecycle {
     create_before_destroy = true
@@ -73,3 +79,7 @@ resource "aws_lb_target_group_attachment" "lambda" {
 #   target_id        = aws_ecs_service.contador.id
 #   port = 80
 # }
+
+output "lb_dns_name" {
+  value = aws_lb.contagem.dns_name
+}

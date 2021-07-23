@@ -53,8 +53,8 @@ resource "aws_lambda_function" "contagem" {
   runtime = "nodejs12.x"
 
   vpc_config {
-    subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-    security_group_ids = [aws_security_group.contagem.id]
+    subnet_ids         = [aws_subnet.public_subnet_a.id]
+    security_group_ids = [aws_security_group.public_contagem.id]
   }
 
   environment {

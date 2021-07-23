@@ -6,6 +6,10 @@ variable "Environment" {
   default = "dev"
 }
 
-variable "domain_name" {
-  default = "pdz-contagem-api.com"
+variable "repository_name" {
+  default = "repo_contagem"
+}
+
+variable "region" {
+  default = "us-east-1"
 }
