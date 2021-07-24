@@ -4,8 +4,13 @@
   "description": "Lambda para atualizar contagem no banco de dados",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "test --collectCoverage"
   },
   "author": "weslei.paula@fatec.sp.gov.br",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.23.0",
+    "@aws-sdk/util-dynamodb": "^3.23.0"
+  }
 }
