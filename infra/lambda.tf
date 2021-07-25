@@ -29,9 +29,9 @@ resource "aws_s3_bucket_object" "contagem" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
   key    = "contagem.zip"
-  source = "../lambda.zip"
+  source = "lambda.zip"
 
-  etag = filemd5("../lambda.zip")
+  etag = filemd5("lambda.zip")
 }
 
 
