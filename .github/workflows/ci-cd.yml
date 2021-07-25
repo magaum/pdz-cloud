@@ -64,16 +64,13 @@ jobs:
       - name: test
         run: npm test
       
-      - uses: papeloto/action-zip@v1
-        with:
-          files: lambda/
-          recursive: false
-          dest: lambda.zip
+      - name: zip lambda content
+        run: zip -q -r lambda.zip * -x coverage test
       
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
-          path: lambda.zip
+          path: lambda/lambda.zip
 
   terraform:
     name: 'Terraform'
