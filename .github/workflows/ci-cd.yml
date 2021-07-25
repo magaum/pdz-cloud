@@ -38,6 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
+          path: lambda.zip
 
   terraform:
     name: 'Terraform'
