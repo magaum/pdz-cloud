@@ -35,7 +35,7 @@ jobs:
       - name: dist
         uses: thedoctor0/zip-release@master
         with:
-          path: ./infra
+          path: ../infra
           directory: ./lambda
           type: 'zip'
           filename: 'lambda.zip'
