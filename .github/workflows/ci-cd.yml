@@ -38,7 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
-          path: ../infra/lambda.zip
+          path: lambda.zip
 
   terraform:
     name: 'Terraform'
@@ -59,6 +59,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: lambda.zip
+        path: lambda
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
