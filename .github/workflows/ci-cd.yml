@@ -56,7 +56,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         cli_config_credentials_token: ${{ secrets.TERRAFORM_API_TOKEN }}
-
+     
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -64,6 +64,13 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
+
+    - name: view content
+      run: ls -la
+      
+    - name: cp lambda zipped
+      working-directory: ./lambda
+      run: ls -la
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
