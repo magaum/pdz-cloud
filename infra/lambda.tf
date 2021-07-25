@@ -18,13 +18,6 @@ resource "aws_iam_role" "lambda_permission" {
 EOF
 }
 
-data "archive_file" "contagem" {
-  type = "zip"
-
-  source_dir  = "../lambda"
-  output_path = "../lambda.zip"
-}
-
 resource "aws_s3_bucket" "lambda_bucket" {
   bucket = "pdz-lambda-contagem"
 
@@ -36,9 +29,9 @@ resource "aws_s3_bucket_object" "contagem" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
   key    = "contagem.zip"
-  source = data.archive_file.contagem.output_path
+  source = "../lambda.zip"
 
-  etag = filemd5(data.archive_file.contagem.output_path)
+  etag = filemd5("../lambda.zip")
 }
 
 
@@ -46,7 +39,7 @@ resource "aws_lambda_function" "contagem" {
   s3_bucket        = aws_s3_bucket.lambda_bucket.id
   s3_key           = aws_s3_bucket_object.contagem.key
   function_name    = var.lambda_name
-  source_code_hash = data.archive_file.contagem.output_base64sha256
+  source_code_hash = filebase64sha256(aws_s3_bucket_object.contagem.content)
   role             = aws_iam_role.lambda_permission.arn
   handler          = "index.handler"
 
