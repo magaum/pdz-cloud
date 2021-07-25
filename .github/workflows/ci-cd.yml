@@ -64,9 +64,11 @@ jobs:
       - name: test
         run: npm test
       
-      - uses: montudor/action-zip@v1
+      - uses: papeloto/action-zip@v1
         with:
-          args: zip -qq -r lambda.zip lambda/ -x "test*" "coverage*"
+          files: lambda/
+          recursive: false
+          dest: lambda.zip
       
       - uses: actions/upload-artifact@v2
         with:
