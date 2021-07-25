@@ -16,7 +16,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./lambda
+        working-directory: lambda
         
     steps:
       - uses: actions/checkout@v2
