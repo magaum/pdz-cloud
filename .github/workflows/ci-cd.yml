@@ -66,14 +66,11 @@ jobs:
       
       - name: zip lambda content
         run: zip -v lambda.zip * -x coverage test
-        
-      - name: v
-        run: ls -la
       
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
-          path: lambda.zip
+          path: lambda/lambda.zip
 
   terraform:
     name: 'Terraform'
