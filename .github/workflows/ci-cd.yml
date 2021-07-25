@@ -41,6 +41,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
             
   lambda:
+    needs: [docker]
     runs-on: ubuntu-latest
     
     defaults:
