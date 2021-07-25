@@ -31,9 +31,13 @@ jobs:
 
       - name: test
         run: npm test
+        
+      - name: Install zip
+        uses: montudor/action-zip@v0.1.0
 
       - name: zip lambda content
-        run: zip -r lambda.zip . -x "test*" "coverage*"
+        run: zip -qq -r lambda.zip . -x "test*" "coverage*"
+        working-directory: lambda
 
   terraform:
     name: 'Terraform'
