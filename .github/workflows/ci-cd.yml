@@ -59,8 +59,8 @@ jobs:
       uses: actions/checkout@v2
       
     - uses: actions/download-artifact@v2
-        with:
-          name: lambda.zip
+      with:
+        name: lambda.zip
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
