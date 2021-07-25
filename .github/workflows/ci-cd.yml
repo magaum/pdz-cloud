@@ -31,9 +31,6 @@ jobs:
 
       - name: test
         run: npm test
-        
-      - name: Install zip
-        uses: action-zip@v1
 
       - name: zip lambda content
         run: zip -qq -r lambda.zip . -x "test*" "coverage*"
