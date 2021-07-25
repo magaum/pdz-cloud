@@ -33,11 +33,14 @@ jobs:
         run: npm test
         
       - name: Install zip
-        uses: montudor/action-zip@v0.1.0
+        uses: action-zip@v1
 
       - name: zip lambda content
         run: zip -qq -r lambda.zip . -x "test*" "coverage*"
-        working-directory: lambda
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lambda.zip
 
   terraform:
     name: 'Terraform'
@@ -54,7 +57,10 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v2
-
+      
+    - uses: actions/download-artifact@v2
+        with:
+          name: lambda.zip
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
@@ -68,12 +74,12 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
-
+          
     - name: view content
       run: ls -la
       
     - name: cp lambda zipped
-      working-directory: ../
+      working-directory: ./lambda
       run: ls -la
 
     # Generates an execution plan for Terraform
