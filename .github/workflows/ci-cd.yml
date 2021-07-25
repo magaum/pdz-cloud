@@ -69,7 +69,7 @@ jobs:
       run: ls -la
       
     - name: cp lambda zipped
-      working-directory: ./lambda
+      working-directory: ../
       run: ls -la
 
     # Generates an execution plan for Terraform
