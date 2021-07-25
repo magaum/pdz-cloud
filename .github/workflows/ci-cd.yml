@@ -1,4 +1,4 @@
-name: 'CI-CD Pipeline'
+name: 'CI/CD Pipeline'
 
 on:
   push:
@@ -8,24 +8,15 @@ on:
 
 jobs:
   docker:
-    name: "Docker CI"
     runs-on: ubuntu-latest
-    
     env:
       REGISTRY: "asp-pdz-ecs"
-      
     defaults:
       run:
         shell: bash
         working-directory: ./ecs
-        
     steps:
-      - name: Checkout
       - uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        
       - name: Dockerhub Login
         uses: docker/login-action@v1.10.0
         with:
@@ -49,9 +40,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
             
-  lambda:    
-    name: "Lambda CI"
-    needs: [docker]
+  lambda:
     runs-on: ubuntu-latest
     
     defaults:
@@ -60,7 +49,6 @@ jobs:
         working-directory: ./lambda
         
     steps:
-      - name: Checkout
       - uses: actions/checkout@v2
       
       - name: use node 12
@@ -71,40 +59,37 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      
       - name: install dependencies
         run: npm ci
 
       - name: test
         run: npm test
       
-      - name: zip lambda content
       - uses: montudor/action-zip@v1
         with:
           args: zip -qq -r lambda.zip . -x "test*" "coverage*"
       
-      - name: upload
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
           path: lambda.zip
 
   terraform:
-    name: 'AWS Deployment'
+    name: 'Terraform'
     runs-on: ubuntu-latest
     environment: development
     needs: [lambda, docker]
-    
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
         working-directory: ./infra
 
     steps:
+    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v2
       
-    - name: Get zip content
     - uses: actions/download-artifact@v2
       with:
         name: lambda.zip
@@ -115,12 +100,15 @@ jobs:
       with:
         cli_config_credentials_token: ${{ secrets.TERRAFORM_API_TOKEN }}
      
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
 
+    # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
 
+    # Generates an execution plan for Terraform
     - name: Terraform Plan
       run: terraform plan
       
@@ -128,6 +116,8 @@ jobs:
       id: validate
       run: terraform validate -no-color
 
+      # On push to master, build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: terraform apply -auto-approve
