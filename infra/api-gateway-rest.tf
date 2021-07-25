@@ -66,12 +66,6 @@ resource "aws_api_gateway_resource" "contagem" {
   path_part   = "{username}"
 }
 
-# resource "aws_api_gateway_resource" "contagem_username" {
-#   rest_api_id = aws_api_gateway_rest_api.contagem.id
-#   parent_id   = aws_api_gateway_resource.contagem.id
-#   path_part   = "{username}"
-# }
-
 resource "aws_api_gateway_method" "contagem" {
   rest_api_id   = aws_api_gateway_rest_api.contagem.id
   resource_id   = aws_api_gateway_resource.contagem.id

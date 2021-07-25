@@ -73,9 +73,3 @@ resource "aws_lb_target_group_attachment" "lambda" {
   target_id        = aws_lambda_function.contagem.arn
   depends_on       = [aws_lambda_permission.lb_lambda_invoke_permission]
 }
-
-# resource "aws_lb_target_group_attachment" "ecs" {
-#   target_group_arn = aws_lb_target_group.ecs_target_group.arn
-#   target_id        = aws_ecs_service.contador.id
-#   port = 80
-# }
