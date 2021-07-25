@@ -65,7 +65,10 @@ jobs:
         run: npm test
       
       - name: zip lambda content
-        run: zip -v lambda.zip *
+        run: zip -v lambda.zip * -x coverage test
+        
+      - name: v
+        run: ls -la
       
       - uses: actions/upload-artifact@v2
         with:
