@@ -31,20 +31,21 @@ jobs:
 
       - name: test
         run: npm test
-
-      - name: dist
-        uses: thedoctor0/zip-release@master
+      
+      - uses: montudor/action-zip@v1
         with:
-          directory: ./lambda
-          type: 'zip'
-          filename: 'lambda.zip'
-          exclusions: '*test* *coverage*'
+          args: zip -qq -r lambda.zip . -x "test*" "coverage*"
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lambda.zip
+          path: lambda.zip
 
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: development
-
+    needs: [lambda]
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -55,13 +56,19 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v2
+      
+    - uses: actions/download-artifact@v2
+      with:
+        working-directory: lambda
+        name: lambda.zip
+        path: lambda
+        work-directory: infra
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         cli_config_credentials_token: ${{ secrets.TERRAFORM_API_TOKEN }}
-
+     
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -69,6 +76,13 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
+
+    - name: view content
+      run: ls -la
+      
+    - name: cp lambda zipped
+      working-directory: ./lambda
+      run: ls -la
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
