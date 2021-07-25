@@ -56,11 +56,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       
+    - name: view content
+      run: ls -la
+      
+    - name: cp lambda zipped
+      working-directory: ./lambda
+      run: ls -la
+
     - uses: actions/download-artifact@v2
       with:
         name: lambda.zip
         path: lambda
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
@@ -73,13 +80,6 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
-          
-    - name: view content
-      run: ls -la
-      
-    - name: cp lambda zipped
-      working-directory: ./lambda
-      run: ls -la
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
