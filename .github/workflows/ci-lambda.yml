@@ -16,7 +16,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: lambda
+        working-directory: ./lambda
         
     steps:
       - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
       - name: use node 12
         uses: actions/setup-node@v2
         with:
-          working-directory: lambda
+          working-directory: ./lambda
           node-version: '12'
           cache: 'npm'
 
