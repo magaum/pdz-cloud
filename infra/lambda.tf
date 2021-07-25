@@ -21,8 +21,8 @@ EOF
 data "archive_file" "contagem" {
   type = "zip"
 
-  source_dir  = "${path.module}./lambda"
-  output_path = "${path.module}/lambda.zip"
+  source_dir  = "../lambda"
+  output_path = "../lambda.zip"
 }
 
 resource "aws_s3_bucket" "lambda_bucket" {
