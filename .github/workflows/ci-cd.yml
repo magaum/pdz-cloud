@@ -62,6 +62,7 @@ jobs:
         working-directory: lambda
         name: lambda.zip
         path: lambda
+        work-directory: infra
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
