@@ -66,7 +66,7 @@ jobs:
       
       - uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r lambda.zip lambda -x "test*" "coverage*"
+          args: zip -qq -r lambda.zip lambda/* -x "test*" "coverage*"
       
       - uses: actions/upload-artifact@v2
         with:
