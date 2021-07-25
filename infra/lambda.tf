@@ -39,7 +39,7 @@ resource "aws_lambda_function" "contagem" {
   s3_bucket        = aws_s3_bucket.lambda_bucket.id
   s3_key           = aws_s3_bucket_object.contagem.key
   function_name    = var.lambda_name
-  source_code_hash = aws_s3_bucket_object.contagem.content_base64
+  source_code_hash = filebase64sha256("lambda.zip")
   role             = aws_iam_role.lambda_permission.arn
   handler          = "index.handler"
 
