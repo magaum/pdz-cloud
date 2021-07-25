@@ -31,9 +31,10 @@ jobs:
 
       - name: test
         run: npm test
-
-      - name: zip lambda content
-        run: zip -qq -r lambda.zip . -x "test*" "coverage*" | ls -la
+      
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r lambda.zip . -x "test*" "coverage*" | ls -la
       
       - uses: actions/upload-artifact@v2
         with:
