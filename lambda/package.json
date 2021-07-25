@@ -5,12 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "test --collectCoverage"
+    "test": "jest --collectCoverage"
   },
   "author": "weslei.paula@fatec.sp.gov.br",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.23.0",
     "@aws-sdk/util-dynamodb": "^3.23.0"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
   }
 }

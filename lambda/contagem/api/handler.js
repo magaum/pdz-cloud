@@ -6,12 +6,12 @@ const {
 } = require("@aws-sdk/client-dynamodb");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
-const { getUsername, response } = require("./common");
+const { getUsername, response } = require("../common");
 const {
   getCommandInput,
   updateCommandInput,
   putCommandInput,
-} = require("./command");
+} = require("../command");
 
 const handler = async (event) => {
   console.log("Lambda iniciada no ambiente: ", process.env.NODE_ENV);
