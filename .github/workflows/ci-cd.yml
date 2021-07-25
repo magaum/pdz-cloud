@@ -8,6 +8,7 @@ on:
 
 jobs:
   docker:
+    name: "Docker CI"
     runs-on: ubuntu-latest
     
     env:
@@ -48,7 +49,8 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
             
-  lambda:
+  lambda:    
+    name: "Lambda CI"
     needs: [docker]
     runs-on: ubuntu-latest
     
@@ -76,16 +78,19 @@ jobs:
       - name: test
         run: npm test
       
+      - name: zip lambda content
       - uses: montudor/action-zip@v1
         with:
           args: zip -qq -r lambda.zip . -x "test*" "coverage*"
       
+      - name: upload
       - uses: actions/upload-artifact@v2
         with:
           name: lambda.zip
           path: lambda.zip
 
   terraform:
+    name: 'AWS Deployment'
     runs-on: ubuntu-latest
     environment: development
     needs: [lambda, docker]
@@ -99,6 +104,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       
+    - name: Get zip content
     - uses: actions/download-artifact@v2
       with:
         name: lambda.zip
