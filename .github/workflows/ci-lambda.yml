@@ -12,16 +12,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     defaults:
       run:
+        shell: bash
         working-directory: ./lambda
+        
     steps:
       - uses: actions/checkout@v2
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'us-east-1'
+      
       - name: use node 12
         uses: actions/setup-node@v2
         with:
