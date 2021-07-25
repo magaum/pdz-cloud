@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contagem", "Contagem.csproj", "{B735F81F-20EF-4718-8C95-C1A0DDF7FA5E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B735F81F-20EF-4718-8C95-C1A0DDF7FA5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B735F81F-20EF-4718-8C95-C1A0DDF7FA5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B735F81F-20EF-4718-8C95-C1A0DDF7FA5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B735F81F-20EF-4718-8C95-C1A0DDF7FA5E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {070FEFFE-2BDC-447D-84D9-A04819783E2F}
+	EndGlobalSection
+EndGlobal
