@@ -8,7 +8,6 @@ on:
 
 jobs:
   docker:
-    name: "Docker CI"
     runs-on: ubuntu-latest
     
     env:
@@ -50,7 +49,6 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
             
   lambda:
-    name: "Lambda CI"
     needs: [docker]
     runs-on: ubuntu-latest
     
