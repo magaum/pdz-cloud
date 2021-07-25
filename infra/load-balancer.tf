@@ -2,8 +2,8 @@ resource "aws_lb" "contagem" {
   name               = "application-load-balancer"
   internal           = false
   load_balancer_type = "application"
-  subnets            = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
-  security_groups    = [aws_security_group.public_contagem.id]
+  subnets            = [aws_subnet.public_a.id, aws_subnet.private_a.id]
+  security_groups    = [aws_security_group.security_group.id]
   tags = {
     Environment = var.Environment
   }
@@ -19,12 +19,12 @@ resource "aws_lb_listener" "contagem" {
     forward {
       target_group {
         arn    = aws_lb_target_group.lambda_target_group.arn
-        weight = 99
+        weight = 1
       }
 
       target_group {
         arn    = aws_lb_target_group.ecs_target_group.arn
-        weight = 1
+        weight = 99
       }
       stickiness {
         enabled  = false
@@ -79,7 +79,3 @@ resource "aws_lb_target_group_attachment" "lambda" {
 #   target_id        = aws_ecs_service.contador.id
 #   port = 80
 # }
-
-output "lb_dns_name" {
-  value = aws_lb.contagem.dns_name
-}

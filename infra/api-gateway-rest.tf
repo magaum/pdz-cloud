@@ -48,31 +48,11 @@ resource "aws_iam_role_policy" "cloudwatch" {
 EOF
 }
 
-resource "aws_api_gateway_api_key" "contagem" {
-  name = "x-api-key"
-}
+# resource "aws_api_gateway_api_key" "contagem" {
+#   name = "x-api-key"
+# }
 
 resource "aws_api_gateway_rest_api" "contagem" {
-  body = jsonencode({
-    openapi = "3.0.1"
-    info = {
-      title   = "contagem"
-      version = "1.0"
-    }
-    paths = {
-      "/" = {
-        get = {
-          x-amazon-apigateway-integration = {
-            httpMethod           = "GET"
-            payloadFormatVersion = "1.0"
-            type                 = "HTTP_PROXY"
-            uri                  = "http://${aws_lb.contagem.dns_name}"
-          }
-        }
-      }
-    }
-  })
-
   name = "contagens"
 
   endpoint_configuration {
@@ -80,11 +60,55 @@ resource "aws_api_gateway_rest_api" "contagem" {
   }
 }
 
+resource "aws_api_gateway_resource" "contagem" {
+  rest_api_id = aws_api_gateway_rest_api.contagem.id
+  parent_id   = aws_api_gateway_rest_api.contagem.root_resource_id
+  path_part   = "{username}"
+}
+
+# resource "aws_api_gateway_resource" "contagem_username" {
+#   rest_api_id = aws_api_gateway_rest_api.contagem.id
+#   parent_id   = aws_api_gateway_resource.contagem.id
+#   path_part   = "{username}"
+# }
+
+resource "aws_api_gateway_method" "contagem" {
+  rest_api_id   = aws_api_gateway_rest_api.contagem.id
+  resource_id   = aws_api_gateway_resource.contagem.id
+  http_method   = "GET"
+  authorization = "NONE"
+  request_parameters = {
+    "method.request.path.username" = true
+  }
+}
+
+resource "aws_api_gateway_integration" "contagem" {
+  http_method             = aws_api_gateway_method.contagem.http_method
+  integration_http_method = "GET"
+  resource_id             = aws_api_gateway_resource.contagem.id
+  rest_api_id             = aws_api_gateway_rest_api.contagem.id
+  type                    = "HTTP_PROXY"
+  timeout_milliseconds    = 29000
+  uri                     = "http://${aws_lb.contagem.dns_name}/{username}"
+
+  request_parameters = {
+    "integration.request.path.username" = "method.request.path.username"
+  }
+
+  depends_on = [
+    aws_api_gateway_method.contagem
+  ]
+}
+
 resource "aws_api_gateway_deployment" "contagem" {
   rest_api_id = aws_api_gateway_rest_api.contagem.id
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.contagem.body))
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.contagem.id,
+      aws_api_gateway_method.contagem.id,
+      aws_api_gateway_integration.contagem.id,
+    ]))
   }
 
   lifecycle {
@@ -105,5 +129,6 @@ resource "aws_api_gateway_method_settings" "contagem" {
 
   settings {
     metrics_enabled = true
+    logging_level   = "INFO"
   }
 }

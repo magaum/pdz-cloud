@@ -1,10 +1,9 @@
-resource "aws_ecr_repository" "contagem" {
-  name = var.repository_name
-}
-
 resource "aws_ecs_cluster" "contador_cluster" {
   name = "pdz"
-
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
   configuration {
     execute_command_configuration {
       kms_key_id = aws_kms_key.kms_ecs.arn
@@ -28,26 +27,23 @@ resource "aws_cloudwatch_log_group" "contador_logs" {
 }
 
 resource "aws_ecs_service" "contador" {
-  name            = "contador-api"
-  cluster         = aws_ecs_cluster.contador_cluster.id
-  task_definition = aws_ecs_task_definition.contador.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  # ordered_placement_strategy {
-  #   type  = "binpack"
-  #   field = "cpu"
-  # }
+  name             = "contador-api"
+  cluster          = aws_ecs_cluster.contador_cluster.id
+  task_definition  = aws_ecs_task_definition.contador.arn
+  desired_count    = 1
+  launch_type      = "FARGATE"
+  platform_version = "1.3.0"
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_target_group.arn
-    container_name   = "contador"
+    container_name   = "contador-api"
     container_port   = 80
   }
 
   network_configuration {
-    security_groups = [aws_security_group.private_contagem.id]
-    subnets         = [aws_subnet.private_subnet_a.id]
+    security_groups  = [aws_security_group.ecs_security_group.id]
+    subnets          = [aws_subnet.public_a.id]
+    assign_public_ip = true
   }
 
   depends_on = [aws_lb_target_group.ecs_target_group]
@@ -61,13 +57,28 @@ resource "aws_cloudwatch_log_group" "contador" {
   }
 }
 
+resource "aws_ecr_repository" "contagem" {
+  name                 = "contagem-repository"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = false
+  }
+}
+
 resource "aws_ecs_task_definition" "contador" {
-  family = "contador"
+  family                   = "contador"
+  task_role_arn            = aws_iam_role.task_role.arn
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.contador_ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name        = "contador"
-      image       = "aws_ecr_repository.contador.repository_url"
-      cpu         = 10
+      name        = "contador-api"
+      image       = "magaum/asp-pdz-ecs:latest"
+      cpu         = 1
       networkMode = "awsvpc"
       memory      = 256
       essential   = true
@@ -76,7 +87,7 @@ resource "aws_ecs_task_definition" "contador" {
         options = {
           awslogs-group : aws_cloudwatch_log_group.contador.name,
           awslogs-region : var.region,
-          awslogs-stream-prefix : "web"
+          awslogs-stream-prefix : "/aws/ecs"
         }
       }
       portMappings = [
@@ -85,56 +96,154 @@ resource "aws_ecs_task_definition" "contador" {
           hostPort      = 80
         }
       ]
+      Environment = [
+        {
+          "Name" : "ASPNETCORE_ENVIRONMENT",
+          "Value" : var.Environment
+        },
+        {
+          "Name" : "REGION",
+          "Value" : var.region
+        },
+        {
+          "Name" : "TABLE_NAME",
+          "Value" : var.DynamoTableName
+        }
+      ]
     }
   ])
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = "256"
-  memory                   = "512"
-
-  execution_role_arn = aws_iam_role.ecs_execution_role.arn
-  task_role_arn      = aws_iam_role.ecs_execution_role.arn
 }
 
-resource "aws_iam_role" "ecs_execution_role" {
+resource "aws_iam_role" "task_role" {
+  name               = "ecs_task_role"
+  assume_role_policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": "sts:AssumeRole",
+     "Principal": {
+       "Service": "ecs-tasks.amazonaws.com"
+     },
+     "Effect": "Allow",
+     "Sid": ""
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role" "contador_ecs_task_execution_role" {
   name               = "ecs_task_execution_role"
   assume_role_policy = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": "sts:AssumeRole",
+     "Principal": {
+       "Service": "ecs-tasks.amazonaws.com"
+     },
+     "Effect": "Allow",
+     "Sid": ""
+   }
+ ]
 }
-  EOF
+EOF
 }
 
-resource "aws_iam_role_policy" "ecs_execution_role_policy" {
-  name   = "ecs_execution_role_policy"
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
+  role       = aws_iam_role.contador_ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_role_policy_attachment" {
+  role       = aws_iam_role.task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_service_role_policy_attachment" {
+  role       = aws_iam_role.task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMSelfManageServiceSpecificCredentials"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_full_role_policy_attachment" {
+  role       = aws_iam_role.task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_ssm_role_policy_attachment" {
+  role       = aws_iam_role.task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+
+resource "aws_iam_role_policy" "contador_ecs_policy" {
+  name   = "pull_push_ecr"
+  role   = aws_iam_role.task_role.id
   policy = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem",
+                "logs:CreateLogStream",
+                "logs:GetLogEvents",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "iam:GenerateCredentialReport",
+                "iam:GenerateServiceLastAccessedDetails",
+                "iam:Get*",
+                "iam:List*",
+                "iam:SimulateCustomPolicy",
+                "iam:SimulatePrincipalPolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowPushPull",
+            "Resource": [
+                "${aws_ecr_repository.contagem.arn}"
+            ],
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload"
+            ]
+        },
+        {
+            "Action": [
+                "ecs:RunTask"
+            ],
+            "Resource": [
+                "${aws_ecs_task_definition.contador.arn}"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "ecs:StopTask",
+                "ecs:DescribeTasks"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
 }
-  EOF
-  role   = aws_iam_role.ecs_execution_role.id
+EOF
 }

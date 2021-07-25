@@ -43,29 +43,29 @@ resource "aws_s3_bucket_object" "contagem" {
 
 
 resource "aws_lambda_function" "contagem" {
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
-  s3_key    = aws_s3_bucket_object.contagem.key
-  function_name = var.lambda_name
+  s3_bucket        = aws_s3_bucket.lambda_bucket.id
+  s3_key           = aws_s3_bucket_object.contagem.key
+  function_name    = var.lambda_name
   source_code_hash = data.archive_file.contagem.output_base64sha256
-  role          = aws_iam_role.lambda_permission.arn
-  handler       = "index.handler"
+  role             = aws_iam_role.lambda_permission.arn
+  handler          = "index.handler"
 
   runtime = "nodejs12.x"
 
   vpc_config {
-    subnet_ids         = [aws_subnet.public_subnet_a.id]
-    security_group_ids = [aws_security_group.public_contagem.id]
+    subnet_ids         = [aws_subnet.public_a.id]
+    security_group_ids = [aws_security_group.lambda_security_group.id]
   }
 
   environment {
     variables = {
-      Name = "contagem",
-      Environment = var.Environment
+      NODE_ENV   = var.Environment
+      REGION     = var.region
+      TABLE_NAME = var.DynamoTableName
     }
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.lambda_logs,
     aws_cloudwatch_log_group.contagem,
   ]
 }
@@ -75,10 +75,9 @@ resource "aws_cloudwatch_log_group" "contagem" {
   retention_in_days = 3
 }
 
-resource "aws_iam_policy" "lambda_logging" {
-  name        = "lambda_logging"
-  path        = "/"
-  description = "IAM policy for logging from a lambda"
+resource "aws_iam_role_policy" "lambda_role" {
+  name = "lambda_role"
+  role = aws_iam_role.lambda_permission.id
 
   policy = <<EOF
 {
@@ -91,6 +90,10 @@ resource "aws_iam_policy" "lambda_logging" {
         "ec2:DeleteNetworkInterface",
         "ec2:DescribeInstances",
         "ec2:AttachNetworkInterface",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
@@ -101,10 +104,10 @@ resource "aws_iam_policy" "lambda_logging" {
   ]
 }
 EOF
-# "Resource": "arn:aws:logs:*:*:*",
+  # "Resource": "arn:aws:logs:*:*:*",
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_logs" {
-  role       = aws_iam_role.lambda_permission.name
-  policy_arn = aws_iam_policy.lambda_logging.arn
-}
+# resource "aws_iam_role_policy_attachment" "lambda_logs" {
+#   role       = aws_iam_role.lambda_permission.name
+#   policy_arn = aws_iam_role_policy.lambda_logging.arn
+# }

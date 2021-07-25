@@ -6,10 +6,10 @@ variable "Environment" {
   default = "dev"
 }
 
-variable "repository_name" {
-  default = "repo_contagem"
-}
-
 variable "region" {
   default = "us-east-1"
+}
+
+variable "DynamoTableName" {
+  default = "tabela-contagem"
 }
