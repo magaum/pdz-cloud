@@ -32,7 +32,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: ./ecs
           push: true
           tags: magaum/asp-pdz-ecs:latest
           
