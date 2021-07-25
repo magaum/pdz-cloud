@@ -33,7 +33,7 @@ jobs:
         run: npm test
 
       - name: zip lambda content
-        run: zip -qq -r lambda.zip . -x "test*" "coverage*"
+        run: zip -qq -r lambda.zip . -x "test*" "coverage*" | ls -la
       
       - uses: actions/upload-artifact@v2
         with:
@@ -65,6 +65,7 @@ jobs:
 
     - uses: actions/download-artifact@v2
       with:
+        working-directory: lambda
         name: lambda.zip
         path: lambda
 
