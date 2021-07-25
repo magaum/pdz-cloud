@@ -59,10 +59,9 @@ jobs:
       
     - uses: actions/download-artifact@v2
       with:
-        working-directory: lambda
+        working-directory: infra
         name: lambda.zip
         path: lambda
-        working-directory: infra
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
