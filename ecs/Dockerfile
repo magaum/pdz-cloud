@@ -17,4 +17,4 @@ RUN dotnet publish "Contagem.Api/Contagem.Api.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Contagem.Api/Contagem.Api.dll"]
+ENTRYPOINT ["dotnet", "Contagem.Api.dll"]
