@@ -19,12 +19,12 @@ resource "aws_lb_listener" "contagem" {
     forward {
       target_group {
         arn    = aws_lb_target_group.lambda_target_group.arn
-        weight = 1
+        weight = 50
       }
 
       target_group {
         arn    = aws_lb_target_group.ecs_target_group.arn
-        weight = 99
+        weight = 50
       }
       stickiness {
         enabled  = false
