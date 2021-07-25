@@ -86,7 +86,6 @@ jobs:
           path: lambda.zip
 
   terraform:
-    name: 'AWS Deployment'
     runs-on: ubuntu-latest
     environment: development
     needs: [lambda, docker]
