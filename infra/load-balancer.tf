@@ -58,7 +58,7 @@ resource "aws_lb_target_group" "ecs_target_group" {
     protocol = "HTTP"
     path     = "/health"
     matcher  = "200"
-    interval = 10
+    interval = 120
   }
 
   lifecycle {

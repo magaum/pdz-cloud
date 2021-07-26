@@ -11,5 +11,5 @@ variable "region" {
 }
 
 variable "DynamoTableName" {
-  default = "tabela-contagem"
+  default = "contagem"
 }
