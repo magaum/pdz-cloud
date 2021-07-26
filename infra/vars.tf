@@ -14,7 +14,7 @@ variable "DynamoTableName" {
   default = "contagem"
 }
 
-variable "private_az" {
+variable "public_bz" {
   default = "us-east-1f"
 }
 

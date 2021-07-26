@@ -46,7 +46,7 @@ resource "aws_lambda_function" "contagem" {
   runtime = "nodejs12.x"
 
   vpc_config {
-    subnet_ids         = [aws_subnet.public_a.id, aws_subnet.private_a.id]
+    subnet_ids         = [aws_subnet.public_a.id, aws_subnet.public_b.id]
     security_group_ids = [aws_security_group.lambda_security_group.id]
   }
 
@@ -97,10 +97,5 @@ resource "aws_iam_role_policy" "lambda_role" {
   ]
 }
 EOF
-  # "Resource": "arn:aws:logs:*:*:*",
 }
 
-# resource "aws_iam_role_policy_attachment" "lambda_logs" {
-#   role       = aws_iam_role.lambda_permission.name
-#   policy_arn = aws_iam_role_policy.lambda_logging.arn
-# }

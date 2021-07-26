@@ -42,7 +42,7 @@ resource "aws_ecs_service" "contador" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_security_group.id]
-    subnets          = [aws_subnet.public_a.id, aws_subnet.private_a.id]
+    subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
     assign_public_ip = true
   }
 
