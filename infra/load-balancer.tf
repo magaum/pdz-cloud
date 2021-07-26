@@ -2,6 +2,7 @@ resource "aws_lb" "contagem" {
   name               = "application-load-balancer"
   internal           = false
   load_balancer_type = "application"
+  idle_timeout       = "120"
   subnets            = [aws_subnet.public_a.id, aws_subnet.private_a.id]
   security_groups    = [aws_security_group.security_group.id]
   tags = {

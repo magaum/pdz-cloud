@@ -45,7 +45,7 @@ resource "aws_ecs_service" "contador" {
     subnets          = [aws_subnet.public_a.id, aws_subnet.private_a.id]
     assign_public_ip = true
   }
-
+  
   depends_on = [aws_lb_target_group.ecs_target_group]
 }
 

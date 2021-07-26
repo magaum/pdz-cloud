@@ -19,10 +19,7 @@ namespace Contagem.V1.Controllers
         {
             _logger.LogInformation("Health check");
 
-            return Ok(new Response()
-            {
-                Message = "Healthy"
-            });
+            return Ok();
         }
     }
 }
