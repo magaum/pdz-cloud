@@ -53,6 +53,14 @@ resource "aws_lb_target_group" "ecs_target_group" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.public.id
 
+  health_check {
+    port     = 80
+    protocol = "HTTP"
+    path = "/health"
+    matcher = "200"
+    interval = 10
+  }
+
   lifecycle {
     create_before_destroy = true
   }
