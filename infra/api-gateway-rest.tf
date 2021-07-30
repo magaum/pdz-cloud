@@ -78,7 +78,7 @@ resource "aws_api_gateway_account" "contagem" {
 }
 
 resource "aws_iam_role" "api_gateway_role" {
-  name = "api_gateway_cloudwatch_global"
+  name = "api_gateway_role"
 
   assume_role_policy = <<EOF
 {
