@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "tabela_contagem" {
-  name           = var.DynamoTableName
+  name           = var.dynamo_table_name
   billing_mode   = "PROVISIONED"
   read_capacity  = 5
   write_capacity = 5
@@ -11,7 +11,7 @@ resource "aws_dynamodb_table" "tabela_contagem" {
   }
 
   tags = {
-    Name        = var.DynamoTableName
-    Environment = var.Environment
+    Name        = var.dynamo_table_name
+    Environment = var.environment
   }
 }

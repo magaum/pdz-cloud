@@ -2,7 +2,7 @@ variable "lambda_name" {
   default = "contagem"
 }
 
-variable "Environment" {
+variable "environment" {
   default = "dev"
 }
 
@@ -10,14 +10,14 @@ variable "region" {
   default = "us-east-1"
 }
 
-variable "DynamoTableName" {
+variable "dynamo_table_name" {
   default = "contagem"
 }
 
-variable "public_bz" {
+variable "az_public_b" {
   default = "us-east-1f"
 }
 
-variable "public_az" {
+variable "az_public_a" {
   default = "us-east-1a"
 }

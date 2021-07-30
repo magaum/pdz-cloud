@@ -52,9 +52,9 @@ resource "aws_lambda_function" "contagem" {
 
   environment {
     variables = {
-      NODE_ENV   = var.Environment
+      NODE_ENV   = var.environment
       REGION     = var.region
-      TABLE_NAME = var.DynamoTableName
+      TABLE_NAME = var.dynamo_table_name
     }
   }
 

@@ -1,9 +1,6 @@
 resource "aws_ecs_cluster" "contador_cluster" {
-  name = "pdz"
-  setting {
-    name  = "containerInsights"
-    value = "enabled"
-  }
+  name = "contador"
+
   configuration {
     execute_command_configuration {
       kms_key_id = aws_kms_key.kms_ecs.arn
@@ -11,7 +8,7 @@ resource "aws_ecs_cluster" "contador_cluster" {
 
       log_configuration {
         cloud_watch_encryption_enabled = true
-        cloud_watch_log_group_name     = aws_cloudwatch_log_group.contador_logs.name
+        cloud_watch_log_group_name     = aws_cloudwatch_log_group.contador.name
       }
     }
   }
@@ -20,10 +17,6 @@ resource "aws_ecs_cluster" "contador_cluster" {
 resource "aws_kms_key" "kms_ecs" {
   description             = "contagem"
   deletion_window_in_days = 7
-}
-
-resource "aws_cloudwatch_log_group" "contador_logs" {
-  name = "contagem"
 }
 
 resource "aws_ecs_service" "contador" {
@@ -53,27 +46,18 @@ resource "aws_cloudwatch_log_group" "contador" {
   name = "ecs-log-group"
 
   tags = {
-    Environment = var.Environment
-  }
-}
-
-resource "aws_ecr_repository" "contagem" {
-  name                 = "contagem-repository"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = false
+    Environment = var.environment
   }
 }
 
 resource "aws_ecs_task_definition" "contador" {
   family                   = "contador"
   task_role_arn            = aws_iam_role.task_role.arn
+  execution_role_arn       = aws_iam_role.contador_ecs_task_execution_role.arn
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.contador_ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
       name        = "contador-api"
@@ -99,7 +83,7 @@ resource "aws_ecs_task_definition" "contador" {
       Environment = [
         {
           "Name" : "ASPNETCORE_ENVIRONMENT",
-          "Value" : var.Environment
+          "Value" : var.environment
         },
         {
           "Name" : "REGION",
@@ -107,7 +91,7 @@ resource "aws_ecs_task_definition" "contador" {
         },
         {
           "Name" : "TABLE_NAME",
-          "Value" : var.DynamoTableName
+          "Value" : var.dynamo_table_name
         }
       ]
     }
@@ -157,29 +141,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attach
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_role_policy_attachment" {
-  role       = aws_iam_role.task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_iam_service_role_policy_attachment" {
-  role       = aws_iam_role.task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMSelfManageServiceSpecificCredentials"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_iam_full_role_policy_attachment" {
-  role       = aws_iam_role.task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_ssm_role_policy_attachment" {
-  role       = aws_iam_role.task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-
-resource "aws_iam_role_policy" "contador_ecs_policy" {
-  name   = "pull_push_ecr"
+resource "aws_iam_role_policy" "ecs_policy" {
+  name   = "ecs_policy"
   role   = aws_iam_role.task_role.id
   policy = <<EOF
 {
@@ -196,35 +159,6 @@ resource "aws_iam_role_policy" "contador_ecs_policy" {
                 "logs:PutLogEvents"
             ],
             "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "iam:PassRole",
-                "iam:GenerateCredentialReport",
-                "iam:GenerateServiceLastAccessedDetails",
-                "iam:Get*",
-                "iam:List*",
-                "iam:SimulateCustomPolicy",
-                "iam:SimulatePrincipalPolicy"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "AllowPushPull",
-            "Resource": [
-                "${aws_ecr_repository.contagem.arn}"
-            ],
-            "Effect": "Allow",
-            "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-            ]
         },
         {
             "Action": [

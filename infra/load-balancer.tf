@@ -6,7 +6,7 @@ resource "aws_lb" "contagem" {
   subnets            = [aws_subnet.public_a.id, aws_subnet.public_b.id]
   security_groups    = [aws_security_group.security_group.id]
   tags = {
-    Environment = var.Environment
+    Environment = var.environment
   }
 }
 
